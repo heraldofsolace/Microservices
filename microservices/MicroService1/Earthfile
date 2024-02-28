@@ -1,26 +1,19 @@
 VERSION 0.8
 
-FROM maven:3.9.6-eclipse-temurin-17-alpine
-WORKDIR /microservices/MicroService1
-
-deps:
-  LOCALLY
-  SAVE ARTIFACT ../../libs/Lib1 src/libs/Lib1
-  SAVE ARTIFACT ../../libs/Lib2 src/libs/Lib2
-  SAVE ARTIFACT ../MicroService2 src/microservices/MicroService2
-  SAVE ARTIFACT ./ src/microservices/MicroService1
-  SAVE ARTIFACT ../pom.xml src/microservices/pom.xml
-  SAVE ARTIFACT ../../libs/pom.xml src/libs/pom.xml
-  SAVE ARTIFACT ../../pom.xml src/pom.xml
-
 build:
-  FROM maven:3.9.6-eclipse-temurin-17-alpine
-  COPY --dir +deps/src .
-  WORKDIR src
-  RUN mvn package -pl microservices/MicroService1 -am
+  FROM maven:3-eclipse-temurin-17
+  COPY ../../libs/Lib1+build/Lib1-1.0-SNAPSHOT.jar .
+  RUN mvn install:install-file \
+    -Dfile=Lib1-1.0-SNAPSHOT.jar \
+    -DgroupId=org.example \
+    -DartifactId=Lib1 \
+    -Dversion=1.0-SNAPSHOT \
+    -Dpackaging=jar
+  COPY . .
+  RUN mvn package 
   SAVE ARTIFACT microservices/MicroService1/target/MicroService1-1.0-SNAPSHOT-jar-with-dependencies.jar
 
 docker:
   FROM +build
-  CMD ["java", "-jar", "microservices/MicroService1/target/MicroService1-1.0-SNAPSHOT-jar-with-dependencies.jar"]
+  CMD ["java", "-jar", "target/MicroService1-1.0-SNAPSHOT-jar-with-dependencies.jar"]
   SAVE IMAGE microservice1:latest
