@@ -1,21 +1,8 @@
 VERSION 0.8
 
-FROM maven:3.9.6-eclipse-temurin-17-alpine
-WORKDIR /libs/Libs2
-
-deps:
-  LOCALLY
-  SAVE ARTIFACT ../../microservices/MicroService1 src/microservices/MicroService1
-  SAVE ARTIFACT ../../microservices/MicroService2 src/microservices/MicroService2
-  SAVE ARTIFACT ../Lib1 src/libs/Lib1
-  SAVE ARTIFACT ./ src/libs/Lib2
-  SAVE ARTIFACT ../pom.xml src/libs/pom.xml
-  SAVE ARTIFACT ../../microservices/pom.xml src/microservices/pom.xml
-  SAVE ARTIFACT ../../pom.xml src/pom.xml
-
 build:
-  FROM maven:3.9.6-eclipse-temurin-17-alpine
-  COPY --dir +deps/src .
-  WORKDIR src
-  RUN mvn package -pl libs/Lib2 -am
-  SAVE ARTIFACT libs/Lib1/target/Lib2-1.0-SNAPSHOT.jar
+  FROM maven:3-eclipse-temurin-17
+  COPY . . 
+  RUN mvn package 
+  RUN cp target/Lib2-1.0-SNAPSHOT.jar .
+  SAVE ARTIFACT Lib2-1.0-SNAPSHOT.jar
